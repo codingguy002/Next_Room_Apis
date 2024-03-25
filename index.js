@@ -39,3 +39,5 @@ app.get("/nextroom/api/ping", (req, res) => {
 app.listen(PORT, () => {
   console.log("Apis are working on port", PORT);
 });
+
+// MONGO_URL="mongodb+srv://nextroom:Abcd1234@cluster0.k45t03f.mongodb.net/?retryWrites=true&w=majority"
