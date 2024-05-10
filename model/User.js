@@ -2,10 +2,10 @@ const mongoose = require("mongoose");
 
 const UserSchema = new mongoose.Schema(
   {
-    username: {
+    fullname: {
       type: String,
       max: 50,
-      required: [true, "username is required"],
+      required: [true, "fullname is required"],
     },
     email: {
       type: String,
@@ -33,6 +33,18 @@ const UserSchema = new mongoose.Schema(
       max: 50,
       default: null,
     },
+    city: {
+      type: String,
+      default: null,
+    },
+    state: {
+      type: String,
+      default: null,
+    },
+    zip_code: {
+      type: String,
+      default: null,
+    },
 
     image: {
       type: String,
@@ -44,14 +56,18 @@ const UserSchema = new mongoose.Schema(
     },
     role: {
       type: String,
-      enum: ["superadmin","admin", "user"], // define the roles available in your system
+      enum: ["provider", "seeker"], // define the roles available in your system
       required: [true, "role must be admin or user"],
     },
-    fcmToken: {
+    profile_status: {
       type: String,
-      default: '',
+      enum: ["active", "inactive", "suspended"], // define the roles available in your system
+      default: "active",
     },
-    
+    fcm_token: {
+      type: String,
+      default: null,
+    },
   },
   { timestamps: true }
 );

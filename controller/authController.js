@@ -1,7 +1,9 @@
-const User = require("../models/User");
+const User = require("../model/User");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const handleMsg = require("../ErrorHandling/handleMsg");
 const register = async (req, res) => {
+  console.log(req.body);
   try {
     const checkEmail = await User.findOne({
       email: req.body.email,
@@ -10,34 +12,36 @@ const register = async (req, res) => {
       mobile: req.body.mobile,
     });
     if (checkMobile) {
-      throw new Error("Mobile Number already exist");
+      // throw new Error("Mobile Number already exist");
+      handleMsg(res, "error", 404, null, "Mobile Number already exist");
+      return;
     }
     if (checkEmail) {
-      throw new Error("email already exist");
+      // throw new Error("email already exist");
+      handleMsg(res, "error", 404, null, "email already exist");
+      return;
     }
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(req.body.password, salt);
-    if (req?.body?.username?.length < 5) {
+    if (req?.body?.firstname?.length < 5) {
       res.status(400).json({
         status: false,
-        message: "Username must be atleast 5 characters long",
+        message: "FullName must be atleast 5 characters long",
       });
       return;
     }
     const newUser = new User({
-      username: req.body.username,
+      fullname: req.body.fullname,
       email: req.body.email,
       mobile: req.body.mobile,
       password: hashedPassword,
       role: req.body.role,
     });
     await newUser.save();
-    res.status(200).json(newUser);
+    handleMsg(res, "success", 200, newUser, "");
   } catch (err) {
-    console.log({ err: err });
-    res
-      .status(500)
-      .json({ status: false, message: err.message, statuscode: 500 });
+    console.log({ sayeenerrrrorrr: err.message });
+    handleMsg(res, "error", 500, null, err.message);
   }
 };
 
@@ -47,12 +51,9 @@ const login = async (req, res) => {
     console.log({ loginFcm: req.body?.fcmToken });
 
     const user = await User.findOne({ email: req.body.email });
+    console.log({ user });
     if (!user) {
-      return res.status(400).json({
-        status: false,
-        message: "Please Create Your Account",
-        statuscode: 400,
-      });
+      handleMsg(res, "error", 400, null, "Invalid email or password");
     }
 
     const validatePass = await bcrypt.compare(req.body.password, user.password);
@@ -66,26 +67,21 @@ const login = async (req, res) => {
         expiresIn: "90000000000000h",
       });
       user.fcmToken =
-        req?.body?.fcmToken?.length > 0 ? req?.body?.fcmToken : "";
+        req?.body?.fcmToken?.length > 0 ? req?.body?.fcmToken : null;
 
       //add new token
       user.token = accessToken;
-      await user.save();
-      const updatedUser = await User.findOne({ email: req.body.email });
 
-      res.status(200).json(updatedUser);
+      await user.save();
+      console.log({ accessToken });
+      const updatedUser = await User.findOne({ email: req.body.email });
+      handleMsg(res, "success", 200, updatedUser, "");
     } else {
-      res.status(400).json({
-        status: false,
-        message: "Invalid Email or password",
-        statuscode: 400,
-      });
+      handleMsg(res, "error", 400, null, "Invalid email or password");
     }
   } catch (err) {
     console.log({ errorfromcatch: err });
-    res
-      .status(500)
-      .json({ status: false, message: err.message, statuscode: 500 });
+    handleMsg(res, "error", 500, null, err.message);
   }
 };
 
