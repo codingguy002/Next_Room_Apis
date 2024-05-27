@@ -133,4 +133,15 @@ const changePassword = async (req, res) => {
   }
 };
 
-module.exports = { register, login, verifyCredentials, changePassword };
+const allUser = async (req, res) => {
+  try {
+    const getAllUsers = await User.find({});
+    handleMsg(res, "success", 200, getAllUsers);
+
+  } catch (err) {
+    handleMsg(res, "error", 500, null, err.message);
+
+  }
+};
+
+module.exports = { register, login, verifyCredentials, changePassword,allUser };

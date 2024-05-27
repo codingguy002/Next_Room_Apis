@@ -22,22 +22,26 @@ const sendRequest = async (req, res) => {
     console.log({ body: req.body });
     const { listId } = req.body;
     const userId = req.user?._id;
+    console.log({ userId });
     const findListForRequest = await Request.find({ listId });
     const list = await List.findById({ _id: listId });
     const posterUserData = await User.findById({ _id: list.userId });
-    // console.log({ posterUserData });
     console.log({ findListForRequest });
 
     // if (findListForRequest === null) {
     // const userIds = [];
     // userIds.push(userId);
-    const user = findListForRequest.map((item, index) => {
-      if (userId == item.userId) {
-        return userId;
-      }
+    const userr = findListForRequest.filter((item, index) => {
+      console.log({ post: item.userId });
+      console.log({ userId });
+      // if (userId === item.userId) {
+      //   return item.userId;
+      // }
+      return userId == item.userId;
     });
-    console.log({ user });
-    if (user.length > 0) {
+    console.log({ userr });
+    // console.log({ length: userr.length }, userr[0]);
+    if (userr.length > 0) {
       handleMsg(
         res,
         "error",
@@ -50,6 +54,7 @@ const sendRequest = async (req, res) => {
         listData: list,
         listId: listId,
         userId: userId,
+        posterPersonId: posterUserData._id,
         posterData: posterUserData,
         request_details: req.body.request_details,
       });
@@ -94,4 +99,13 @@ const sendRequest = async (req, res) => {
   }
 };
 
-module.exports = { sendRequest };
+const getRequest = async (req, res) => {
+  const userId = req.user?._id;
+  console.log(req.user?._id);
+
+  const allList = await Request.find({ posterPersonId: userId });
+  // console.log({ allList });
+  handleMsg(res, "success", 200, allList, "List Fetched");
+};
+
+module.exports = { sendRequest, getRequest };

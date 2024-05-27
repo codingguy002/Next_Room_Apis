@@ -11,6 +11,11 @@ const RequestSchema = new mongoose.Schema(
       type: Object,
       default: {},
     },
+    posterPersonId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: [true, "Poster Person Id is required"],
+    },
     // userId: [
     //   {
     //     type: mongoose.Schema.Types.ObjectId,
