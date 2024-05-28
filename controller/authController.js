@@ -54,6 +54,7 @@ const login = async (req, res) => {
     console.log({ user });
     if (!user) {
       handleMsg(res, "error", 400, null, "Invalid email or password");
+      return;
     }
 
     const validatePass = await bcrypt.compare(req.body.password, user.password);
@@ -137,11 +138,15 @@ const allUser = async (req, res) => {
   try {
     const getAllUsers = await User.find({});
     handleMsg(res, "success", 200, getAllUsers);
-
   } catch (err) {
     handleMsg(res, "error", 500, null, err.message);
-
   }
 };
 
-module.exports = { register, login, verifyCredentials, changePassword,allUser };
+module.exports = {
+  register,
+  login,
+  verifyCredentials,
+  changePassword,
+  allUser,
+};
