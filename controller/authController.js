@@ -49,10 +49,10 @@ const login = async (req, res) => {
   try {
     console.log({ loginEmail: req.body.email });
     console.log({ loginFcm: req.body?.fcmToken });
-    if (!req.body.email) {
+    if (req.body.email.length === 0) {
       handleMsg(res, "error", 400, null, "Please enter email");
       return;
-    } else if (!req.body.password) {
+    } else if (req.body.password.length === 0) {
       handleMsg(res, "error", 400, null, "Please enter password");
       return;
     }
