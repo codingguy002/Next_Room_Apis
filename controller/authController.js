@@ -49,6 +49,13 @@ const login = async (req, res) => {
   try {
     console.log({ loginEmail: req.body.email });
     console.log({ loginFcm: req.body?.fcmToken });
+    if (!req.body.email) {
+      handleMsg(res, "error", 400, null, "Please enter email");
+      return;
+    } else if (!req.body.password) {
+      handleMsg(res, "error", 400, null, "Please enter password");
+      return;
+    }
 
     const user = await User.findOne({ email: req.body.email });
     console.log({ user });
