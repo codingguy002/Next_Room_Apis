@@ -16,13 +16,6 @@ const RequestSchema = new mongoose.Schema(
       ref: "User",
       required: [true, "Poster Person Id is required"],
     },
-    // userId: [
-    //   {
-    //     type: mongoose.Schema.Types.ObjectId,
-    //     ref: "User",
-    //     required: [true, "UserId is required"],
-    //   },
-    // ],
 
     userId: {
       type: mongoose.Schema.Types.ObjectId,
@@ -40,19 +33,35 @@ const RequestSchema = new mongoose.Schema(
         enum: ["monthly", "weekly"],
         required: [true, "Rent must be monthly/weekly"],
       },
+      // rentAmount: {
+      //   type: Number,
+      //   required: [true, "Rent amount is required"],
+      // },
       security_deposit: {
         type: Number,
         required: [true, "Security Deposit is required"],
       },
       smoke_drink: {
-        type: Array,
-        // enum: ["smoke", "drink", "no"],
+        type: [String],
+        enum: ["smoke", "drink", "no"],
         required: [true, "Smoke/Drink must be smoke, drink, no"],
       },
       accommodatePets: {
         type: String,
         enum: ["yes", "no"],
         required: [true, "select yes or no"],
+      },
+
+      accomodationFor: {
+        type: [String],
+        enum: ["Myself", "Kids", "Couple"],
+        required: [true, "select myself, kids, couple"],
+      },
+      numberOfKids: {
+        type: Number,
+      },
+      kidsAges: {
+        type: [Number],
       },
 
       numberOfCats: {
@@ -82,22 +91,21 @@ const RequestSchema = new mongoose.Schema(
         required: [true, "Please select stay time"],
       },
       preferred_amenities: {
-        type: String,
-        enum: ["Furnished Room", "Unfurnished Room", "Private Room"],
+        type: [String],
+        enum: ["Furnished Room", "Unfurnished Room", "Private Bathroom"],
         required: [true, "Please select preferred amenities"],
       },
       additional_note: {
         type: String,
       },
+      status: {
+        type: String,
+        enum: ["New", "Accepted", "Denied"],
+        default: "New",
+      },
     },
   },
   { timestamps: true }
 );
-// RequestSchema.path("request_details").validate(function (value) {
-//   if (value.accommodatePets === "yes") {
-//     return value.numberOfCats && value.numberOfDogs;
-//   }
-//   return true;
-// }, 'If accommodatePets is "yes", numberOfCats and numberOfDogs are required.');
 
 module.exports = mongoose.model("Request", RequestSchema);

@@ -13,7 +13,9 @@ const validateToken = async (req, res, next) => {
         async (err, decoded) => {
           if (err) {
             console.log("error", err);
-            res.status(401).json({ status: false, message: "Token Expired" });
+            res
+              .status(401)
+              .json({ status: false, msg: "Token Expired", code: 401 });
             // throw new Error("Token Expired");
             return;
           }
@@ -22,19 +24,21 @@ const validateToken = async (req, res, next) => {
           const findUser = await User.findById({ _id: req.user._id });
 
           if (findUser?.token !== token) {
-            res.status(401).json({ status: false, message: "Unauthorized" });
+            res
+              .status(401)
+              .json({ status: false, msg: "Unauthorized", code: 401 });
             return;
           }
           next();
         }
       );
     } else {
-      res.status(401).json({ status: false, message: "Token Missing" });
+      res.status(401).json({ status: false, msg: "Token Missing", code: 401 });
       return;
     }
   } catch (e) {
     console.log({ e });
-    res.status(401).json({ status: false, message: e.message });
+    res.status(401).json({ status: false, msg: e.message, code: 401 });
   }
 };
 

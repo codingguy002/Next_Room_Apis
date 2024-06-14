@@ -25,7 +25,7 @@ const sendRequest = async (req, res) => {
     console.log({ userId });
     const findListForRequest = await Request.find({ listId });
     const list = await List.findById({ _id: listId });
-    const posterUserData = await User.findById({ _id: list.userId });
+    const posterUserData = await User.findById({ _id: list.owner._id });
     console.log({ findListForRequest });
 
     // if (findListForRequest === null) {
@@ -58,7 +58,7 @@ const sendRequest = async (req, res) => {
         posterData: posterUserData,
         request_details: req.body.request_details,
       });
-      await newReq.save();
+      
       // }
       // else {
       //   findListForRequest.userId.push(userId);
@@ -77,24 +77,29 @@ const sendRequest = async (req, res) => {
           body: `${req?.user?.fullname} has requested to your listing`,
         },
       };
+      console.log({ posterUserData });
+      console.log({ userReq: req.user });
 
-      if (posterUserData.fcm_token !== null) {
+      if (posterUserData?.fcm_token.length > 0) {
         sendNotificationUsingApp(
           NextRoomApp,
-          posterUserData.fcm_token,
+          posterUserData?.fcm_token,
           messageForPostCreater
         );
       }
-      if (req?.user?.fcm_token !== null) {
-        sendNotificationUsingApp(
-          NextRoomApp,
-          req.user.fcmToken,
-          messageForUser
-        );
-      }
+      // if (req?.user?.fcm_token.length > 0) {
+      //   sendNotificationUsingApp(
+      //     NextRoomApp,
+      //     req?.user?.fcm_token,
+      //     messageForUser
+      //   );
+      // }
+      await newReq.save();
       handleMsg(res, "success", 200, null, "Request Sent successfully");
+
     }
   } catch (err) {
+    console.log(err.message);
     handleMsg(res, "error", 500, null, err.message);
   }
 };
@@ -102,9 +107,7 @@ const sendRequest = async (req, res) => {
 const getRequest = async (req, res) => {
   const userId = req.user?._id;
   console.log(req.user?._id);
-
   const allList = await Request.find({ posterPersonId: userId });
-  // console.log({ allList });
   handleMsg(res, "success", 200, allList, "List Fetched");
 };
 

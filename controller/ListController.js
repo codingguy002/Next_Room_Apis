@@ -1,21 +1,93 @@
 const List = require("../model/List");
+const User = require("../model/User");
+
 const handleMsg = require("../ErrorHandling/handleMsg");
 const { parser } = require("../helpers");
+const {
+  admin,
+  userServiceAccount,
+  sendNotificationUsingApp,
+} = require("../firebase/index");
 
+const NextRoomApp = admin.initializeApp(
+  {
+    credential: admin.credential.cert(userServiceAccount),
+  },
+  "NextRoom1"
+);
 const addList = async (req, res) => {
   try {
-    parser.array("image")(req, res, async (err) => {
+    await parser.array("images")(req, res, async (err) => {
       if (err) {
         res.status(400).json({ status: false, message: "Image upload failed" });
         return;
       }
-      const list = { ...req.body };
-      const imageUrl = req.files ? req.files : "";
-      list.image = imageUrl;
-      list.userId = req.user._id;
+      const getUser = await User.find({ role: "seeker" });
+      // const list = { ...req.body };
+      console.log(req.body, "body");
+      const list = {
+        title: req.body.title,
+        property_type: req.body.property_type,
+        property_details: {
+          room: req.body.property_details["room"],
+          landlord: req.body.property_details["landlord"],
+          bathroom: req.body.property_details["bathroom"],
+          bathroom_type: req.body.property_details["bathroom_type"],
+          furnished_type: req.body.property_details["furnished_type"],
+          utilities_included: req.body.property_details["utilities_included"],
+          roommates: {
+            male: req.body.property_details["roommates"]["male"],
+            female: req.body.property_details["roommates"]["female"],
+          },
+        },
+        address: req.body.address,
+        city: req.body.city,
+        state: req.body.state,
+        zip_code: req.body.zip_code,
+        security_deposit: req.body.security_deposit,
+        rent: {
+          amount: req.body.rent["amount"],
+          time: req.body.rent["time"],
+        },
+        lease: req.body.lease,
+        description: req.body.description,
+        availableFrom: req.body.availableFrom,
+        facilities: {
+          laundry_type: req.body.facilities["laundry_type"],
+          parking_type: req.body.facilities["parking_type"],
+          cat_friendly: req.body.facilities["cat_friendly"],
+          dog_friendly: req.body.facilities["dog_friendly"],
+          cannabis_friendly: req.body.facilities["cannabis_friendly"],
+          children_friendly: req.body.facilities["children_friendly"],
+        },
+        longitude: req.body.longitude,
+        latitude: req.body.latitude,
+        images: req.files ? req.files : [],
+        owner:req.user
+      };
+      console.log({ list }, "sayenListHe");
+      console.log({ files: req.files });
+
+      // list.owner=req.user
       const newList = new List(list);
+      console.log({ newList });
       await newList.save();
       handleMsg(res, "success", 200, null, "List added successfully");
+      const messageForUser = {
+        notification: {
+          title: "Attention",
+          body: "New room has been listed",
+        },
+      };
+      await getUser.map(async (item) => {
+        if (item?.fcm_token?.length > 0) {
+          await sendNotificationUsingApp(
+            NextRoomApp,
+            item?.fcm_token,
+            messageForUser
+          );
+        }
+      });
     });
   } catch (err) {
     handleMsg(res, "error", 500, null, err.message);
@@ -52,6 +124,24 @@ const editList = async (req, res) => {
     handleMsg(res, "error", 500, null, err.message);
   }
 };
+const changeStatus = async (req, res) => {
+  try {
+    const { listId, status } = req.body;
+    // const listId = req.body.listId;
+    const updateList = await List.findOneAndUpdate(
+      {
+        _id: listId,
+      },
+      {
+        $set: { status: status },
+      }
+    );
+    updateList &&
+      handleMsg(res, "success", 200, null, "Status Changed Successfully");
+  } catch (err) {
+    handleMsg(res, "error", 500, null, err.message);
+  }
+};
 const getList = async (req, res) => {
   try {
     let filter = {};
@@ -59,7 +149,26 @@ const getList = async (req, res) => {
     if (status) {
       filter.status = status;
     }
-    const list = await List.find(filter);
+    const list = await List.find(filter).sort({ createdAt: -1 });
+    handleMsg(res, "success", 200, list, "");
+  } catch (err) {
+    handleMsg(res, "error", 500, null, err.message);
+  }
+};
+const myList = async (req, res) => {
+  try {
+    const user = req.user;
+
+    let filter = {
+      "owner._id": user._id,
+    };
+    const { status } = req.query;
+    if (status) {
+      filter.status = status;
+    }
+    console.log({ filter });
+    const list = await List.find(filter).sort({ createdAt: -1 });
+    console.log({ list });
     handleMsg(res, "success", 200, list, "");
   } catch (err) {
     handleMsg(res, "error", 500, null, err.message);
@@ -86,4 +195,12 @@ const deleteList = async (req, res) => {
   }
 };
 
-module.exports = { addList, deleteList, getList, editList, getListById };
+module.exports = {
+  addList,
+  deleteList,
+  getList,
+  editList,
+  getListById,
+  myList,
+  changeStatus,
+};

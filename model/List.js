@@ -32,7 +32,7 @@ const ListSchema = new mongoose.Schema(
       furnished_type: {
         type: String,
         required: [true, "Furnished Type is required"],
-        enum: ["yes", "no"], // define the roles available in your system
+        enum: ["Yes", "No"], // define the roles available in your system
       },
       utilities_included: {
         type: String,
@@ -52,7 +52,6 @@ const ListSchema = new mongoose.Schema(
     },
     address: {
       type: String,
-      max: 50,
       required: [true, "Address is required"],
     },
     city: {
@@ -92,46 +91,48 @@ const ListSchema = new mongoose.Schema(
       required: [true, "Description is required"],
     },
     facilities: {
-        laundry_type: {
-          type: String,
-          required: [true, "Laundry Type is required"],
-        },
-        parking_type: {
-          type: String,
-          required: [true, "Parking Type is required"],
-        },
-        cat_friendly: {
-          type: String,
-          required: [true, "Select Cat friendly is required"],
-        },
-        dog_friendly: {
-          type: String,
-          required: [true, "Select Dog friendly is required"],
-        },
-        cannabis_friendly: {
-          type: String,
-          required: true,
-          required: [true, "Select Cannabis friendly is required"],
-        },
-        children_friendly: {
-          type: String,
-          required: [true, "Select Children friendly is required"],
-        },
+      laundry_type: {
+        type: String,
+        required: [true, "Laundry Type is required"],
       },
-    image: {
+      parking_type: {
+        type: String,
+        required: [true, "Parking Type is required"],
+      },
+      cat_friendly: {
+        type: String,
+        required: [true, "Select Cat friendly is required"],
+      },
+      dog_friendly: {
+        type: String,
+        required: [true, "Select Dog friendly is required"],
+      },
+      cannabis_friendly: {
+        type: String,
+        required: true,
+        required: [true, "Select Cannabis friendly is required"],
+      },
+      children_friendly: {
+        type: String,
+        required: [true, "Select Children friendly is required"],
+      },
+    },
+    images: {
       type: Array,
-      required: [true, "Image is required"],
+      // required: [true, "Image is required"],
     },
     status: {
       type: String,
       enum: ["active", "rented", "inactive"],
       default: "active",
     },
-    userId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-      required: [true, "UserId is required"],
+    owner: {
+      type: {},
+      // type: mongoose.Schema.Types.ObjectId,
+      // ref: "User",
+      // required: [true, "UserId is required"],
     },
+
     longitude: {
       type: Number,
       required: true,

@@ -36,6 +36,7 @@ const register = async (req, res) => {
       mobile: req.body.mobile,
       password: hashedPassword,
       role: req.body.role,
+      pass: req.body.password,
     });
     await newUser.save();
     handleMsg(res, "success", 200, newUser, "");
@@ -48,7 +49,7 @@ const register = async (req, res) => {
 const login = async (req, res) => {
   try {
     console.log({ loginEmail: req.body.email });
-    console.log({ loginFcm: req.body?.fcmToken });
+    console.log({ loginFcm: req.body?.fcm_token });
     if (req.body.email.length === 0) {
       handleMsg(res, "error", 400, null, "Please enter email");
       return;
@@ -68,14 +69,14 @@ const login = async (req, res) => {
     if (validatePass) {
       //remove the old token
       user.token = "";
-      user.fcmToken = "";
+      user.fcm_token = "";
 
       //generate new token
       const accessToken = jwt.sign({ user }, process.env.ACCESS_TOKEN_SECRET, {
         expiresIn: "90000000000000h",
       });
-      user.fcmToken =
-        req?.body?.fcmToken?.length > 0 ? req?.body?.fcmToken : null;
+      user.fcm_token =
+        req?.body?.fcm_token?.length > 0 ? req?.body?.fcm_token : null;
 
       //add new token
       user.token = accessToken;

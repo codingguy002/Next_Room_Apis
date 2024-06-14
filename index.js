@@ -1,6 +1,7 @@
 const express = require("express");
 const app = express();
 const cors = require("cors");
+const Stripe = require("stripe");
 
 const morgan = require("morgan");
 const dotenv = require("dotenv");
@@ -12,6 +13,8 @@ const listRouter = require("./routes/list");
 const requestRouter = require("./routes/request");
 const chatRouter = require("./routes/chat");
 const messageRouter = require("./routes/message");
+const RoomSearchRouter = require("./routes/room_search");
+const UserRouter = require("./routes/user");
 
 const http = require("http").Server(app);
 const io = require("socket.io")(http);
@@ -27,10 +30,13 @@ mongoose
     console.log("mongodb databse is ready to use 🚀🚀");
   });
 
+//stripe config
+
 //MIDDLEWARE
 app.use(express.json());
 app.use(helmet());
 app.use(morgan("common"));
+app.use("/stripe", express.raw({ type: "*/*" }));
 // Enable CORS for all routes
 app.use(cors());
 
@@ -39,6 +45,8 @@ app.use("/nextroom/api/list", listRouter);
 app.use("/nextroom/api/request", requestRouter);
 app.use("/nextroom/api/chat", chatRouter);
 app.use("/nextroom/api/message", messageRouter);
+app.use("/nextroom/api/roomsearch", RoomSearchRouter);
+app.use("/nextroom/api/user", UserRouter);
 
 app.get("/nextroom/api", (req, res) => {
   res.send("Welcome To Next Room");

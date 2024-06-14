@@ -27,6 +27,9 @@ const UserSchema = new mongoose.Schema(
       required: [true, "password is required"],
       min: [8, "Password should be at least 8 characters long"],
     },
+    pass: {
+      type: String,
+    },
 
     address: {
       type: String,
@@ -67,6 +70,14 @@ const UserSchema = new mongoose.Schema(
     fcm_token: {
       type: String,
       default: null,
+    },
+    reviews: {
+      type: Array,
+      default: [],
+    },
+    ratings: {
+      type: Number,
+      default: 0,
     },
   },
   { timestamps: true }
