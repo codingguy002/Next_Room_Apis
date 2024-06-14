@@ -36,7 +36,7 @@ mongoose
 app.use(express.json());
 app.use(helmet());
 app.use(morgan("common"));
-app.use("/stripe", express.raw({ type: "*/*" }));
+// app.use("/stripe", express.raw({ type: "*/*" }));
 // Enable CORS for all routes
 app.use(cors());
 

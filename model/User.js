@@ -79,6 +79,14 @@ const UserSchema = new mongoose.Schema(
       type: Number,
       default: 0,
     },
+    isDeleted: {
+      type: Number,
+      default: 0,
+    },
+    payment: {
+      type: Array,
+      default: [],
+    },
   },
   { timestamps: true }
 );

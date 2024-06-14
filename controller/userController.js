@@ -1,4 +1,6 @@
 const User = require("../model/User");
+const Transection = require("../model/Transection");
+
 const handleMsg = require("../ErrorHandling/handleMsg");
 const { parser } = require("../helpers");
 const bcrypt = require("bcrypt");
@@ -137,7 +139,11 @@ const payment = async (req, res) => {
       currency: "usd",
       // customer: customer.id,
       payment_method_types: ["card"],
-      metadata: { name: req?.body?.name },
+      metadata: {
+        name: req?.user?.fullname,
+        email: req?.user?.email,
+        mobile: req?.user?.mobile,
+      },
     });
     handleMsg(res, "success", 200, {
       paymentIntent: paymentIntent.client_secret,
@@ -150,28 +156,48 @@ const payment = async (req, res) => {
   }
 };
 
-const paymentFullfillment = async (req, res) => {
-  const sig = req.headers["stripe-signature"];
-  let event;
+// const paymentFullfillment = async (req, res) => {
+//   const sig = req.headers["stripe-signature"];
+//   let event;
+//   try {
+//     event = await stripe.webhooks.constructEvent(
+//       req.body,
+//       sig,
+//       process.env.STRIPE_WEEBHOOK_SECRET
+//     );
+//   } catch (err) {
+//     handleMsg(res, "error", 500, null, err.message);
+//   }
+
+//   if (event.type === "payment_intent.created") {
+//     console.log(`${event.data.object.metadata.name} initated payment!`);
+//   }
+//   // Event when a payment is succeeded
+//   if (event.type === "payment_intent.succeeded") {
+//     console.log(`${event.data.object.metadata.name} succeeded payment!`);
+//     // fulfilment I
+//   }
+//   res.json({ ok: true });
+// };
+const paymentSuccess = async (req, res) => {
   try {
-    event = await stripe.webhooks.constructEvent(
-      req.body,
-      sig,
-      process.env.STRIPE_WEEBHOOK_SECRET
-    );
+    const { amount, days } = req.body;
+    const createTransection = await new Transection({
+      user_id: req.user._id,
+      amount,
+      days,
+    });
+
+    const findUserData = await User.findById(req.user._id);
+    findUserData.payment.push(createTransection);
+    await findUserData.save();
+    await createTransection.save();
+
+    handleMsg(res, "success", 200, null, "You have Succesfully subscribed");
   } catch (err) {
+    console.log({err});
     handleMsg(res, "error", 500, null, err.message);
   }
-
-  if (event.type === "payment_intent.created") {
-    console.log(`${event.data.object.metadata.name} initated payment!`);
-  }
-  // Event when a payment is succeeded
-  if (event.type === "payment_intent.succeeded") {
-    console.log(`${event.data.object.metadata.name} succeeded payment!`);
-    // fulfilment I
-  }
-  res.json({ ok: true });
 };
 
 module.exports = {
@@ -179,5 +205,5 @@ module.exports = {
   updateProfile,
   updatePublicProfile,
   payment,
-  paymentFullfillment,
+  paymentSuccess,
 };
