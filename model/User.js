@@ -60,7 +60,7 @@ const UserSchema = new mongoose.Schema(
     role: {
       type: String,
       enum: ["provider", "seeker"], // define the roles available in your system
-      required: [true, "role must be admin or user"],
+      required: [true, "role must be provider or seeker"],
     },
     profile_status: {
       type: String,
